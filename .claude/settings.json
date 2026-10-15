@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/check-rules.mjs --hook",
+            "timeout": 30,
+            "statusMessage": "Проверка правил проекта..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/scripts/check-rules.mjs --hook",
+            "timeout": 60,
+            "statusMessage": "Проверка правил проекта..."
+          }
+        ]
+      }
+    ]
+  }
+}

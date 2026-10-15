@@ -1,6 +1,6 @@
 import { Global, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PostgresDialect } from 'kysely';
+import { CamelCasePlugin, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
 import { Database } from './database.js';
 
@@ -18,6 +18,8 @@ import { Database } from './database.js';
               max: 10,
             }),
           }),
+          // В коде camelCase (starterCode), в базе snake_case (starter_code).
+          plugins: [new CamelCasePlugin()],
         }),
     },
   ],
