@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { FindTasksQueryDto } from './dto/find-tasks-query.dto.js';
+import { SearchTasksQueryDto } from './dto/search-tasks-query.dto.js';
 import { UpdateTaskDto } from './dto/update-task.dto.js';
 import { TasksService } from './tasks.service.js';
 
@@ -28,6 +29,12 @@ export class TasksController {
   @Get()
   findAll(@Query() query: FindTasksQueryDto) {
     return this.tasksService.findAll(query);
+  }
+
+  // Объявлен до :id, иначе /tasks/search попал бы в findOne как id = 'search'.
+  @Get('search')
+  search(@Query() query: SearchTasksQueryDto) {
+    return this.tasksService.search(query);
   }
 
   // ParseUUIDPipe: на /tasks/abc ответ 400, а не ошибка Postgres про формат uuid.

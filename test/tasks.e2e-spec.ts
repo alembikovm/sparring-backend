@@ -4,7 +4,9 @@ import request from 'supertest';
 import { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
 import { Database } from '../src/database/database.js';
+import { EmbeddingsService } from '../src/embeddings/embeddings.service.js';
 import { createMockDatabase, sentQuery } from './utils/mock-database.js';
+import { createMockEmbeddings } from './utils/mock-embeddings.js';
 
 // HTTP-слой целиком (маршруты, ValidationPipe, ParseUUIDPipe, коды ответов)
 // поверх мок-базы: что «вернула база», задаёт тест.
@@ -41,6 +43,9 @@ describe('Tasks (e2e)', () => {
     })
       .overrideProvider(Database)
       .useValue(mock.db)
+      // без подмены первый же POST /tasks загрузил бы настоящую модель
+      .overrideProvider(EmbeddingsService)
+      .useValue(createMockEmbeddings())
       .compile();
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -117,6 +122,38 @@ describe('Tasks (e2e)', () => {
         .get('/tasks')
         .query({ limit: 1000 })
         .expect(400);
+    });
+  });
+
+  describe('GET /tasks/search', () => {
+    it('returns tasks with similarity, not as a findOne by id "search"', async () => {
+      mock.executeQuery.mockResolvedValueOnce({
+        rows: [{ ...taskRow, distance: 0.1 }],
+      });
+
+      const { body } = await request(app.getHttpServer())
+        .get('/tasks/search')
+        .query({ q: 'счётчик на React', topic: 'React', limit: 3 })
+        .expect(200);
+
+      expect(body).toEqual([
+        expect.objectContaining({ id: taskId, similarity: 0.9 }),
+      ]);
+      expect(body[0]).not.toHaveProperty('distance');
+      expect(sentQuery(mock.executeQuery).sql).toContain('<=>');
+    });
+
+    it.each([
+      ['without q', {}],
+      ['with an empty q', { q: '' }],
+      ['with limit above 20', { q: 'x', limit: 21 }],
+      ['with offset', { q: 'x', offset: 5 }],
+    ])('rejects a request %s with 400', async (_, query) => {
+      await request(app.getHttpServer())
+        .get('/tasks/search')
+        .query(query)
+        .expect(400);
+      expect(mock.executeQuery).not.toHaveBeenCalled();
     });
   });
 
