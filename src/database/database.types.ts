@@ -61,9 +61,18 @@ export interface EvaluationsTable {
   createdAt: Generated<Date>;
 }
 
+export interface TaskEmbeddingsTable {
+  taskId: string;
+  // pgvector принимает и отдаёт вектор строкой вида '[0.1,0.2,...]'
+  embedding: string;
+  model: string;
+  createdAt: Generated<Date>;
+}
+
 export interface DB {
   users: UsersTable;
   tasks: TasksTable;
   submissions: SubmissionsTable;
   evaluations: EvaluationsTable;
+  taskEmbeddings: TaskEmbeddingsTable;
 }

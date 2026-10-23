@@ -24,9 +24,12 @@
     "migrate:make": "kysely migrate make",
     "migrate:latest": "kysely migrate latest",
     "migrate:down": "kysely migrate down",
-    "migrate:list": "kysely migrate list"
+    "migrate:list": "kysely migrate list",
+    "embeddings:demo": "node scripts/embeddings-demo.mjs",
+    "embeddings:reindex": "nest build && node dist/scripts/reindex-embeddings.js"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.0.1",
